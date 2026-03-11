@@ -699,17 +699,24 @@ log_level = INFO
 
     async def _send_reply(self, target, message: discord.Message,
                           content: str = None, *, embed: discord.Embed = None):
-        """Send to thread if available, otherwise reply to the original message."""
-        if isinstance(target, discord.Thread):
-            if embed:
-                await target.send(embed=embed)
-            else:
-                await target.send(content)
-        else:
+        """Send to thread if available, fall back to original message reply."""
+        try:
+            if isinstance(target, discord.Thread):
+                if embed:
+                    await target.send(embed=embed)
+                else:
+                    await target.send(content)
+                return
+        except discord.NotFound:
+            logging.warning("Thread gone, falling back to message reply")
+
+        try:
             if embed:
                 await message.reply(embed=embed, mention_author=False)
             else:
                 await message.reply(content)
+        except discord.NotFound:
+            logging.warning("Original message/channel gone, reply dropped")
 
     def _estimate_heat(self, user_text: str, current_heat: int) -> int:
         """Rough heuristic for heat level adjustment."""

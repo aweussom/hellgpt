@@ -608,7 +608,7 @@ log_level = INFO
         reply_target = message
         if in_allowed_channel and not in_thread:
             try:
-                thread_name = user_text[:80].strip() or "Shipment from Hell"
+                thread_name = message.author.display_name
                 thread = await message.create_thread(name=thread_name)
                 reply_target = thread
             except discord.HTTPException as e:

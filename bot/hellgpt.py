@@ -80,8 +80,9 @@ MAX_DISCORD_LENGTH = 2000
 
 
 def filter_thinking_tags(text: str) -> str:
-    """Remove <thinking>/<reflection> blocks from LLM responses."""
+    """Remove <thinking>/<think>/<reflection> blocks from LLM responses."""
     cleaned = re.sub(r"<thinking>.*?</thinking>", "", text, flags=re.DOTALL | re.IGNORECASE)
+    cleaned = re.sub(r"<think>.*?</think>", "", cleaned, flags=re.DOTALL | re.IGNORECASE)
     cleaned = re.sub(r"<reflection>.*?</reflection>", "", cleaned, flags=re.DOTALL | re.IGNORECASE)
     cleaned = re.sub(r"\n\s*\n\s*\n", "\n\n", cleaned)
     return cleaned.strip()
@@ -587,6 +588,11 @@ log_level = INFO
         if not user_text:
             await message.reply("You mentioned me but said nothing. Even in Hell, we need words to work with.")
             return
+
+        # Input length cap — Discord max is 2000, but enforce in case of API quirks
+        MAX_INPUT_LENGTH = 2000
+        if len(user_text) > MAX_INPUT_LENGTH:
+            user_text = user_text[:MAX_INPUT_LENGTH]
 
         # Determine reply target: create thread in allowed channels, inline otherwise
         in_thread = isinstance(message.channel, discord.Thread)

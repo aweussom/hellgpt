@@ -36,6 +36,24 @@ for item in "${REQUIRED_ITEMS[@]}"; do
     [[ -e "$item" ]] || { echo "Missing: $item"; exit 1; }
 done
 
+# ---- Validate remote env vars -----------------------------------------------
+
+REQUIRED_ENVS="HELLGPT_DISCORD_TOKEN OLLAMA_API_KEY"
+MISSING_ENVS=$(ssh "$TARGET" "
+    source ~/.bashrc 2>/dev/null
+    missing=''
+    for var in ${REQUIRED_ENVS}; do
+        [ -z \"\${!var:-}\" ] && missing=\"\$missing \$var\"
+    done
+    echo \$missing
+")
+
+if [[ -n "${MISSING_ENVS// /}" ]]; then
+    echo "ERROR: Missing env vars on remote:${MISSING_ENVS}"
+    echo "Set them in ~/.bashrc on ${TARGET} and redeploy."
+    exit 1
+fi
+
 # ---- Sync files -------------------------------------------------------------
 
 echo "Syncing to ${TARGET}:${REMOTE_FULL}/ ..."
@@ -124,9 +142,5 @@ Deploy complete.
   Session: screen -r ${SCREEN_SESSION}
   Logs:    ${REMOTE_FULL}/logs/hellgpt.log
   Startup: @reboot crontab entry installed
-
-  Env vars needed on remote (in ~/.bashrc or ${REMOTE_FULL}/${ENV_FILE}):
-    HELLGPT_DISCORD_TOKEN=...
-    OLLAMA_API_KEY=...
 
 EOF

@@ -541,10 +541,20 @@ log_level = INFO
 
             # Respond if mentioned OR in an allowed channel
             mentioned = self.bot.user in message.mentions
-            in_allowed_channel = (
-                hasattr(message.channel, "name")
-                and message.channel.name.lower() in self.allowed_channels
-            )
+            in_thread = isinstance(message.channel, discord.Thread)
+            in_allowed_channel = False
+
+            if in_thread:
+                parent = message.channel.parent
+                in_allowed_channel = (
+                    hasattr(parent, "name")
+                    and parent.name.lower() in self.allowed_channels
+                )
+            else:
+                in_allowed_channel = (
+                    hasattr(message.channel, "name")
+                    and message.channel.name.lower() in self.allowed_channels
+                )
 
             if not mentioned and not in_allowed_channel:
                 logging.debug(
@@ -577,6 +587,32 @@ log_level = INFO
             await message.reply("You mentioned me but said nothing. Even in Hell, we need words to work with.")
             return
 
+        # Determine reply target: create thread in allowed channels, inline otherwise
+        in_thread = isinstance(message.channel, discord.Thread)
+        in_allowed_channel = False
+        if in_thread:
+            parent = message.channel.parent
+            in_allowed_channel = (
+                hasattr(parent, "name")
+                and parent.name.lower() in self.allowed_channels
+            )
+        else:
+            in_allowed_channel = (
+                hasattr(message.channel, "name")
+                and message.channel.name.lower() in self.allowed_channels
+            )
+
+        # In allowed channels: create a new thread for the conversation
+        # In existing threads or @mentions: reply inline
+        reply_target = message
+        if in_allowed_channel and not in_thread:
+            try:
+                thread_name = user_text[:80].strip() or "Shipment from Hell"
+                thread = await message.create_thread(name=thread_name)
+                reply_target = thread
+            except discord.HTTPException as e:
+                logging.warning(f"Could not create thread: {e}")
+
         # Handle surprise routing
         surprise_notice = ""
         active_tradition = session.tradition
@@ -602,7 +638,8 @@ log_level = INFO
         chat_messages.append({"role": "user", "content": user_text})
 
         try:
-            async with message.channel.typing():
+            typing_target = reply_target if reply_target != message else message.channel
+            async with typing_target.typing():
                 loop = asyncio.get_event_loop()
                 response_text = await loop.run_in_executor(
                     None,
@@ -610,7 +647,8 @@ log_level = INFO
                 )
 
             if not response_text:
-                await message.reply("The freight office produced nothing. Try again — even Hell has off days.")
+                await self._send_reply(reply_target, message,
+                    "The freight office produced nothing. Try again — even Hell has off days.")
                 return
 
             # Build embed response
@@ -625,9 +663,8 @@ log_level = INFO
                     color=self._heat_color(session.heat_level),
                 )
                 if i == len(chunks) - 1:
-                    # Footer only on last chunk
                     embed.set_footer(text=f"Gods Expedition \u00b7 {active_tradition}")
-                await message.reply(embed=embed, mention_author=False)
+                await self._send_reply(reply_target, message, embed=embed)
 
             # Update session
             session.history.append({"user": user_text, "assistant": response_text[:500]})
@@ -646,9 +683,9 @@ log_level = INFO
             logging.error(f"Chat error for user {message.author.id}: {e}", exc_info=True)
             error_text = str(e).lower()
             if any(k in error_text for k in ["timeout", "connection", "refused", "unreachable"]):
-                await message.reply(self._get_downtime_message())
+                await self._send_reply(reply_target, message, self._get_downtime_message())
             else:
-                await message.reply(
+                await self._send_reply(reply_target, message,
                     "*stares at the broken freight scale*\n\n"
                     "Something went wrong in the back office. The machinery sputters sometimes. "
                     "Try again shortly.\n\n— HellGPT"
@@ -657,6 +694,20 @@ log_level = INFO
     # -------------------------------------------------------------------
     # Utilities
     # -------------------------------------------------------------------
+
+    async def _send_reply(self, target, message: discord.Message,
+                          content: str = None, *, embed: discord.Embed = None):
+        """Send to thread if available, otherwise reply to the original message."""
+        if isinstance(target, discord.Thread):
+            if embed:
+                await target.send(embed=embed)
+            else:
+                await target.send(content)
+        else:
+            if embed:
+                await message.reply(embed=embed, mention_author=False)
+            else:
+                await message.reply(content)
 
     def _estimate_heat(self, user_text: str, current_heat: int) -> int:
         """Rough heuristic for heat level adjustment."""

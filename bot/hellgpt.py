@@ -668,6 +668,13 @@ log_level = INFO
                 )
                 await self._send_reply(reply_target, message, embed=embed)
 
+            # Clean up original message from channel if we replied in a thread
+            if isinstance(reply_target, discord.Thread):
+                try:
+                    await message.delete()
+                except (discord.NotFound, discord.Forbidden):
+                    pass
+
             # Update session
             session.history.append({"user": user_text, "assistant": response_text[:500]})
             session.history = session.history[-6:]

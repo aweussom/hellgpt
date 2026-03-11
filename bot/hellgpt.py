@@ -641,11 +641,14 @@ log_level = INFO
         try:
             typing_target = reply_target if reply_target != message else message.channel
             async with typing_target.typing():
+                logging.debug(f"Calling LLM with {len(chat_messages)} messages, "
+                              f"system prompt {len(system_prompt)} chars")
                 loop = asyncio.get_event_loop()
                 response_text = await loop.run_in_executor(
                     None,
                     lambda: self.llm.chat(system_prompt, chat_messages),
                 )
+                logging.debug(f"LLM returned {len(response_text) if response_text else 0} chars")
 
             if not response_text:
                 await self._send_reply(reply_target, message,

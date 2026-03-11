@@ -662,8 +662,6 @@ log_level = INFO
                     description=chunk,
                     color=self._heat_color(session.heat_level),
                 )
-                if i == len(chunks) - 1:
-                    embed.set_footer(text=f"Gods Expedition \u00b7 {active_tradition}")
                 await self._send_reply(reply_target, message, embed=embed)
 
             # Update session

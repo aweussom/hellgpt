@@ -470,6 +470,7 @@ log_level = INFO
 
             session.tradition = chosen
             session.heat_level = 1  # Reset heat on tradition change
+            session.history = []    # Clear history so old style doesn't bleed through
             self.sessions.save(session)
 
             await interaction.response.send_message(

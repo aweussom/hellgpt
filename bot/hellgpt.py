@@ -6,8 +6,10 @@ Discord bot with culturally-aware swearing traditions.
 
 import discord
 from discord import app_commands
+from discord.ext import tasks
 import asyncio
 import logging
+from logging.handlers import RotatingFileHandler
 import json
 import os
 import re
@@ -296,8 +298,9 @@ class LLMClient:
         self.model = model
         self.timeout = timeout
         headers = {"Authorization": f"Bearer {api_key}"}
+        logging.info(f"Connecting to LLM: {model} @ {host}")
         self.client = OllamaClient(host=host, headers=headers, timeout=timeout)
-        logging.info(f"LLM client initialized: {model} @ {host}")
+        logging.info("LLM client ready")
 
     def chat(self, system_prompt: str, messages: list[dict]) -> str:
         """Send a chat request. Returns the assistant response text."""
@@ -391,13 +394,14 @@ class HellGPTBot:
         self._register_commands()
         self._register_events()
 
-        logging.info("HellGPTBot initialized")
+        logging.info("HellGPTBot ready")
 
     def _load_config(self, config_path: Path) -> configparser.ConfigParser:
         cfg = configparser.ConfigParser()
         if not config_path.exists():
-            logging.info(f"Config {config_path} missing; generating defaults.")
+            logging.info(f"Config missing, generating defaults: {config_path}")
             self._autogen_config(config_path)
+            logging.info("Default config written")
         cfg.read(config_path)
         return cfg
 
@@ -429,12 +433,12 @@ log_level = INFO
             api_key_env = self.config.get("llm", "api_key_env", fallback="OLLAMA_API_KEY")
             api_key = os.environ.get(api_key_env)
             if not api_key:
-                logging.error(f"Environment variable {api_key_env} not set")
+                logging.error(f"LLM setup failed: {api_key_env} not set in environment")
                 return None
             timeout = self.config.getint("llm", "timeout", fallback=180)
             return LLMClient(model=model, host=host, api_key=api_key, timeout=timeout)
         except Exception as e:
-            logging.error(f"Failed to initialize LLM: {e}", exc_info=True)
+            logging.error(f"LLM setup failed: {e}", exc_info=True)
             return None
 
     # -------------------------------------------------------------------
@@ -514,10 +518,11 @@ log_level = INFO
     def _register_events(self):
         @self.bot.event
         async def on_ready():
-            logging.info(f"HellGPT connected as {self.bot.user}")
-            logging.info(f"Guilds: {[g.name for g in self.bot.guilds]}")
+            logging.info(f"Connecting to Discord as {self.bot.user}")
+            logging.info(f"Connected | guilds: {[g.name for g in self.bot.guilds]}")
 
             # Sync slash commands
+            logging.info("Syncing slash commands...")
             if self.guild_id:
                 guild_obj = discord.Object(id=self.guild_id)
                 self.tree.copy_global_to(guild=guild_obj)
@@ -526,6 +531,16 @@ log_level = INFO
             else:
                 await self.tree.sync()
                 logging.info("Slash commands synced globally")
+
+            # Start heartbeat
+            if not heartbeat.is_running():
+                heartbeat.start()
+
+        @tasks.loop(minutes=1)
+        async def heartbeat():
+            guild_count = len(self.bot.guilds)
+            latency_ms = round(self.bot.latency * 1000)
+            logging.info(f"heartbeat | guilds={guild_count} latency={latency_ms}ms")
 
         @self.bot.event
         async def on_message(message: discord.Message):
@@ -565,7 +580,7 @@ log_level = INFO
                 )
                 return
 
-            logging.info(f"Handling message from {message.author} in #{channel_name}")
+            logging.info(f"Processing message from {message.author} in #{channel_name}")
             await self._handle_chat(message)
 
     # -------------------------------------------------------------------
@@ -615,10 +630,12 @@ log_level = INFO
         if in_allowed_channel and not in_thread:
             try:
                 thread_name = message.author.display_name
+                logging.info(f"Creating thread: {thread_name}")
                 thread = await message.create_thread(name=thread_name)
                 reply_target = thread
+                logging.info(f"Thread created: {thread.id}")
             except discord.HTTPException as e:
-                logging.warning(f"Could not create thread: {e}")
+                logging.warning(f"Thread creation failed: {e}")
 
         # Handle surprise routing
         surprise_notice = ""
@@ -647,14 +664,13 @@ log_level = INFO
         try:
             typing_target = reply_target if reply_target != message else message.channel
             async with typing_target.typing():
-                logging.debug(f"Calling LLM with {len(chat_messages)} messages, "
-                              f"system prompt {len(system_prompt)} chars")
+                logging.info(f"Sending to LLM | msgs={len(chat_messages)} tradition={active_tradition}")
                 loop = asyncio.get_event_loop()
                 response_text = await loop.run_in_executor(
                     None,
                     lambda: self.llm.chat(system_prompt, chat_messages),
                 )
-                logging.debug(f"LLM returned {len(response_text) if response_text else 0} chars")
+                logging.info(f"LLM replied | {len(response_text) if response_text else 0} chars")
 
             if not response_text:
                 await self._send_reply(reply_target, message,
@@ -695,7 +711,7 @@ log_level = INFO
             self.sessions.save(session)
 
         except Exception as e:
-            logging.error(f"Chat error for user {message.author.id}: {e}", exc_info=True)
+            logging.error(f"Chat failed for user {message.author.id}: {e}", exc_info=True)
             error_text = str(e).lower()
             if any(k in error_text for k in ["timeout", "connection", "refused", "unreachable"]):
                 await self._send_reply(reply_target, message, self._get_downtime_message())
@@ -721,7 +737,7 @@ log_level = INFO
                     await target.send(content)
                 return
         except discord.NotFound:
-            logging.warning("Thread gone, falling back to message reply")
+            logging.warning("Thread gone, falling back to channel reply")
 
         try:
             if embed:
@@ -729,7 +745,7 @@ log_level = INFO
             else:
                 await message.reply(content)
         except discord.NotFound:
-            logging.warning("Original message/channel gone, reply dropped")
+            logging.warning("Channel gone, reply dropped")
 
     def _estimate_heat(self, user_text: str, current_heat: int) -> int:
         """Rough heuristic for heat level adjustment."""
@@ -829,6 +845,7 @@ log_level = INFO
             )
         logging.info("Starting HellGPT Discord bot...")
         self.bot.run(token, log_handler=None)
+        logging.info("Bot shut down")
 
 
 # ---------------------------------------------------------------------------
@@ -846,13 +863,18 @@ def main():
     log_level = getattr(logging, level_name, logging.INFO)
     log_file = PROJECT_ROOT / "logs" / "hellgpt.log"
 
+    # Rotating log: 5MB per file, keep 3 backups (20MB max)
+    file_handler = RotatingFileHandler(
+        log_file, maxBytes=5 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
+    file_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+
+    console_handler = logging.StreamHandler()
+    console_handler.setFormatter(logging.Formatter("%(asctime)s - %(levelname)s - %(message)s"))
+
     logging.basicConfig(
         level=log_level,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        handlers=[
-            logging.FileHandler(log_file),
-            logging.StreamHandler(),
-        ],
+        handlers=[file_handler, console_handler],
     )
 
     bot = HellGPTBot()

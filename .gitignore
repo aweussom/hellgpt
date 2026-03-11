@@ -3,6 +3,10 @@
 .env.*
 !.env.example
 
+# Internal planning docs
+CLAUDE.md
+SECURITY-PLAN.md
+
 # Runtime data
 data/sessions.db
 logs/

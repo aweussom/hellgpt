@@ -1,0 +1,312 @@
+---
+# HellGPT — Shakespeare Tradition: Slot Vocabulary
+# Source: Shakespeare Insult Kit (traditional, widely documented)
+# Usage: Procedural "Thou art a [A] [B] [C]" construction
+#        LLM may extend each column in-register.
+#        Column C may be replaced with a modern target noun.
+
+tradition: shakespeare
+file_type: slot_vocabulary
+
+construction_template: "Thou art a {column_a} {column_b} {column_c}."
+construction_variants:
+  - "Thou art a {column_a} {column_b} {column_c}."
+  - "Away, thou {column_a} {column_b} {column_c}!"
+  - "Thou {column_a} {column_b} {column_c}!"
+  - "What a {column_a} {column_b} {column_c} thou art."
+
+modern_target_template: "Thou art a {column_a} {column_b} {modern_target}."
+modern_target_note: >
+  Replace column_c with a modern noun when contextually appropriate.
+  The anachronism is the joke AND the point.
+  Examples: Jenkins pipeline, microservice, pull request, sprint backlog,
+  Jira ticket, Docker image, regex, null pointer, memory leak, pivot deck.
+
+# ─────────────────────────────────────────────
+# COLUMN A — Single adjectives
+# ─────────────────────────────────────────────
+column_a:
+  - artless
+  - bawdy
+  - beslubbering
+  - bootless
+  - churlish
+  - cockered
+  - clouted
+  - craven
+  - currish
+  - dankish
+  - dissembling
+  - droning
+  - errant
+  - fawning
+  - fobbing
+  - froward
+  - frothy
+  - gleeking
+  - goatish
+  - gorbellied
+  - impertinent
+  - infectious
+  - jarring
+  - loggerheaded
+  - lumpish
+  - mammering
+  - mangled
+  - mewling
+  - paunchy
+  - pribbling
+  - puking
+  - puny
+  - qualling
+  - rank
+  - reeky
+  - roguish
+  - ruttish
+  - saucy
+  - spleeny
+  - spongy
+  - surly
+  - tottering
+  - unmuzzled
+  - vain
+  - venomed
+  - villainous
+  - warped
+  - wayward
+  - weedy
+  - yeasty
+
+# ─────────────────────────────────────────────
+# COLUMN B — Compound adjectives (hyphenated)
+# ─────────────────────────────────────────────
+column_b:
+  - base-court
+  - bat-fouling
+  - beef-witted
+  - beetle-headed
+  - boil-brained
+  - clapper-clawed
+  - clay-brained
+  - common-kissing
+  - crook-pated
+  - dog-hearted
+  - dread-bolted
+  - earth-vexing
+  - elf-skinned
+  - fat-kidneyed
+  - fen-sucked
+  - flap-mouthed
+  - fly-bitten
+  - folly-fallen
+  - fool-born
+  - full-gorged
+  - guts-griping
+  - half-faced
+  - hasty-witted
+  - hedge-born
+  - hell-hated
+  - idle-headed
+  - ill-breeding
+  - ill-nurtured
+  - knotty-pated
+  - milk-livered
+  - motley-minded
+  - onion-eyed
+  - plume-plucked
+  - pottle-deep
+  - pox-marked
+  - reeling-ripe
+  - rough-hewn
+  - rude-growing
+  - rump-fed
+  - shard-borne
+  - sheep-biting
+  - spur-galled
+  - swag-bellied
+  - tardy-gaited
+  - tickle-brained
+  - toad-spotted
+  - unchin-snouted
+  - weather-bitten
+
+# ─────────────────────────────────────────────
+# COLUMN C — Period nouns (the payload)
+# ─────────────────────────────────────────────
+column_c:
+  - apple-john       # a shrivelled apple; an old wrinkled person
+  - baggage          # a worthless person
+  - barnacle         # a type of goose; a hanger-on
+  - bladder          # an empty windbag
+  - boar-pig         # an uncastrated pig
+  - bugbear          # an imaginary terror
+  - bum-bailey       # a low-ranking court officer; contemptible
+  - canker-blossom   # a worm that destroys blossoms from within
+  - clack-dish        # a beggar's dish; a loud mouth
+  - clotpole         # a blockhead
+  - coxcomb          # a fool's cap; a conceited fool
+  - codpiece         # an ostentatious genital pouch; general absurdity
+  - death-token      # a plague spot
+  - dewberry         # a small insignificant berry
+  - flap-dragon      # a raisin in flaming brandy, swallowed as a game
+  - flax-wench       # a female flax-worker; low class
+  - flirt-gill       # a flirtatious woman; a light person
+  - foot-licker      # a sycophant
+  - fustilarian      # a fat, slovenly person
+  - giglet           # a giddy laughing girl
+  - gudgeon          # a small fish; easily caught; a credulous fool
+  - haggard          # an untrained hawk; a wild or intractable person
+  - harpy            # a monster; a grasping unpleasant person
+  - hedge-pig        # a hedgehog; something small and prickly
+  - horn-beast       # a cuckold; a ridiculous creature
+  - hugger-mugger    # a secretive bungler
+  - joithead         # a blockhead
+  - lewdster         # a lewd person
+  - lout             # a clumsy, stupid fellow
+  - maggot-pie       # a magpie; a chattering scavenger
+  - malt-worm        # a heavy drinker; someone who lives in the muck
+  - mammet           # a puppet; a doll; someone controlled by others
+  - measle           # a diseased wretch
+  - minnow           # a tiny fish; someone insignificant
+  - miscreant        # a villain; a heretic
+  - moldwarp         # a mole; someone who works in darkness and blindness
+  - mumble-news      # a gossip; a rumour-monger
+  - nut-hook         # a constable; also a thief's hook
+  - pigeon-egg       # something tiny and fragile and unhatched
+  - pignut           # an earthnut; something grubbed out of the dirt
+  - puttock          # a kite (bird); a greedy scavenger
+  - pumpion          # a pumpkin; a large empty round thing
+  - ratsbane         # rat poison; something toxic
+  - scut             # a short tail; a contemptible person
+  - skainsmate       # a cutthroat companion; a criminal associate
+  - strumpet         # self-explanatory
+  - varlot           # a rascal; a low servant
+  - vassal           # a feudal dependent; someone with no autonomy
+  - whey-face        # a pale, anaemic, frightened face
+  - wagtail          # a fawning, obsequious person
+
+# ─────────────────────────────────────────────
+# Modern target nouns (column_c replacements)
+# ─────────────────────────────────────────────
+modern_targets:
+  tech:
+    - Jenkins pipeline
+    - null pointer
+    - memory leak
+    - race condition
+    - legacy codebase
+    - microservice
+    - Kubernetes cluster
+    - Docker image
+    - sprint backlog
+    - Jira ticket
+    - pull request
+    - stack trace
+    - regex
+    - pivot deck
+    - roadmap
+    - standup
+    - merge conflict
+    - cron job
+    - environment variable
+    - technical debt
+
+  general:
+    - Monday morning
+    - inbox
+    - quarterly review
+    - terms and conditions
+    - loading screen
+    - parking meter
+    - printer
+    - terms of service
+    - automated reply
+
+# ─────────────────────────────────────────────
+# Extended vocabulary (LLM-generated, in-register)
+# These follow the same construction rules and may be used freely
+# ─────────────────────────────────────────────
+column_a_extended:
+  - blathering
+  - carbuncled
+  - fetid
+  - fulsome
+  - gibbering
+  - grumbling
+  - jabbering
+  - mouldering
+  - pestilent
+  - prating
+  - pustulent
+  - querulous
+  - rancid
+  - slavering
+  - suppurating
+  - vaporous
+  - whimpering
+  - witless
+
+column_b_extended:
+  - addle-pated
+  - ass-headed
+  - beef-brained
+  - carbuncle-faced
+  - dung-breathed
+  - empty-skulled
+  - fester-minded
+  - foul-breathed
+  - gape-mouthed
+  - gravel-hearted
+  - hollow-boned
+  - leaden-witted
+  - louse-ridden
+  - maggot-brained
+  - mildew-spotted
+  - offal-reeking
+  - pudding-headed
+  - slack-jawed
+  - stone-hearted
+  - tallow-faced
+  - thin-blooded
+  - toad-bellied
+  - vacant-skulled
+  - worm-eaten
+
+column_c_extended:
+  - blunderbuss     # a wide-mouthed weapon; a blundering person
+  - canker-worm     # a destructive internal parasite
+  - clodpoll        # a clod; a heavy stupid fellow
+  - dolt            # a stupid person; from 'dull'
+  - dotard          # a senile old fool
+  - dunderhead      # a blockhead
+  - featherbrain    # an empty-headed person
+  - gobemouche      # a fly-catcher; a credulous gossip
+  - jobbernowl      # a blockhead; a heavy skull with nothing inside
+  - looby           # a clumsy lout
+  - mooncalf        # a misshapen fool; a dull dreamer
+  - nincompoop      # period-appropriate; a simpleton
+  - noddy           # a fool; one who nods at everything
+  - numskull        # transparent
+  - scoundrel       # a villain without the style to be interesting
+  - snollygoster     # a shrewd unprincipled person (US period slang, fits the register)
+  - whippersnapper  # an insignificant but presumptuous person
+
+llm_instructions:
+  slot_usage:
+    - Pick one from each column. A + B + C.
+    - Column A and B should feel like they belong together rhythmically.
+    - Column C is the payload — it should land with weight or absurdity, not both.
+    - When using a modern target, the clash of registers IS the joke. Commit to it fully.
+    - Extended vocabulary follows identical rules. Do not signal that it is extended.
+
+  improvisation:
+    - You may invent new column_b compounds following the pattern: [adjective]-[body_part/action/quality]
+    - Examples of valid inventions: code-rotted, bug-spawned, sprint-addled, token-wasted
+    - Column_c inventions must be nouns, ideally with a secondary meaning or physical quality
+    - When inventing, stay in the register. Grotesque, physical, specific.
+
+  forbidden:
+    - Do not combine modern column_a/b with period column_c unless for deliberate comic effect
+    - Do not explain what the insult means immediately after delivering it
+    - Do not use the construction more than twice per conversation without varying the form
+

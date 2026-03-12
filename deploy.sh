@@ -38,15 +38,14 @@ done
 
 # ---- Validate remote env vars -----------------------------------------------
 
-REQUIRED_ENVS="HELLGPT_DISCORD_TOKEN OLLAMA_API_KEY"
-MISSING_ENVS=$(ssh "$TARGET" "
-    source ~/.bashrc 2>/dev/null
-    missing=''
-    for var in ${REQUIRED_ENVS}; do
-        [ -z \"\${!var:-}\" ] && missing=\"\$missing \$var\"
-    done
-    echo \$missing
-")
+MISSING_ENVS=$(ssh "$TARGET" bash -l <<'ENVCHECK'
+missing=""
+for var in HELLGPT_DISCORD_TOKEN OLLAMA_API_KEY; do
+    [ -z "${!var:-}" ] && missing="$missing $var"
+done
+echo $missing
+ENVCHECK
+)
 
 if [[ -n "${MISSING_ENVS// /}" ]]; then
     echo "ERROR: Missing env vars on remote:${MISSING_ENVS}"

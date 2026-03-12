@@ -2,7 +2,7 @@
 
 > *Profanity, delivered straight from Hell*
 
-A culturally-aware profanity chat assistant delivered as a Discord bot. Based in Hell, Norway — the Gods Expedition freight office, Trondlag. The assistant remains genuinely helpful; profanity is the *voice*, not the product.
+A culturally-aware profanity chat assistant delivered as a Discord bot. Based in Hell, Norway — the Gods Expedition freight office, Trøndelag. The assistant remains genuinely helpful; profanity is the *voice*, not the product.
 
 ---
 

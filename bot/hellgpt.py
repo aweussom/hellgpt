@@ -8,6 +8,7 @@ import discord
 from discord import app_commands
 from discord.ext import tasks
 import asyncio
+import math
 import logging
 from logging.handlers import RotatingFileHandler
 import json
@@ -536,11 +537,26 @@ log_level = INFO
             if not heartbeat.is_running():
                 heartbeat.start()
 
+        _heartbeat_na_streak = 0
+
         @tasks.loop(minutes=1)
         async def heartbeat():
+            nonlocal _heartbeat_na_streak
             guild_count = len(self.bot.guilds)
-            latency_ms = round(self.bot.latency * 1000)
-            logging.info(f"heartbeat | guilds={guild_count} latency={latency_ms}ms")
+            latency = self.bot.latency
+            if math.isinf(latency) or math.isnan(latency):
+                _heartbeat_na_streak += 1
+                if _heartbeat_na_streak >= 3:
+                    logging.warning(
+                        f"heartbeat | guilds={guild_count} latency=N/A "
+                        f"({_heartbeat_na_streak} consecutive)"
+                    )
+                else:
+                    logging.info(f"heartbeat | guilds={guild_count} latency=N/A")
+            else:
+                _heartbeat_na_streak = 0
+                latency_ms = round(latency * 1000)
+                logging.info(f"heartbeat | guilds={guild_count} latency={latency_ms}ms")
 
         @self.bot.event
         async def on_message(message: discord.Message):

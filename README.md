@@ -2,6 +2,8 @@
 
 > *Profanity, delivered straight from Hell*
 
+> **Status: retired (2026-11-04).** The bot is stopped and its `@reboot` entry on ub1 is removed. A swearing Discord bot was a novelty. The part worth keeping is the *voices*: the eight tradition personalities in `instructions/traditions/` and the example conversations in `data/examples/`. Reuse those as a prompt pack, not as a running service.
+
 A culturally-aware profanity chat assistant delivered as a Discord bot. Based in Hell, Norway — the Gods Expedition freight office, Trøndelag. The assistant remains genuinely helpful; profanity is the *voice*, not the product.
 
 ---
@@ -75,17 +77,6 @@ cp .env.example .env
 pip install -r requirements.txt
 python bot/hellgpt.py
 ```
-
----
-
-## Deployment
-
-```bash
-./deploy.sh                              # default: tommyl@100.96.31.44:hellgpt/
-./deploy.sh user@host:path               # explicit target
-```
-
-Rsyncs files, restarts the screen session, and ensures an `@reboot` crontab entry on the remote. Environment variables are sourced from `~/.bashrc` on the remote host.
 
 ---
 
